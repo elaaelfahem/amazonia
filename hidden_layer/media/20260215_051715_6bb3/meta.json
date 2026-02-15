@@ -1,0 +1,67 @@
+{
+  "job_id": "20260215_051715_6bb3",
+  "bbox_4326": [
+    -73.48542417599968,
+    -1.995742702005081,
+    -72.74700901245343,
+    -1.1177028116867314
+  ],
+  "aoi_geojson": {
+    "type": "Feature",
+    "properties": {},
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            -73.415038,
+            -1.29339
+          ],
+          [
+            -73.485352,
+            -1.995734
+          ],
+          [
+            -72.747069,
+            -1.995734
+          ],
+          [
+            -72.747069,
+            -1.117769
+          ],
+          [
+            -73.415038,
+            -1.29339
+          ]
+        ]
+      ]
+    }
+  },
+  "source": {
+    "sensor": "Sentinel-2 L2A",
+    "item_id": "S2B_MSIL2A_20251220T151719_R125_T18MXC_20251220T185058",
+    "datetime": "2025-12-20T15:17:19.024000+00:00",
+    "cloud": 8.779712,
+    "crs": "epsg:3857"
+  },
+  "spectral": {
+    "ndvi_lo": -0.011158681511878966,
+    "ndvi_hi": 0.5782035422325138
+  },
+  "hotspots": [
+    {
+      "id": 1,
+      "centroid": [
+        -73.11621659422656,
+        -1.556722756845906
+      ],
+      "priority": 0.7,
+      "ndvi_anom": 0.7,
+      "dino_anom": 0.0,
+      "reason": [
+        "spectral_score"
+      ]
+    }
+  ],
+  "disclaimer": "Decision support only. Scores indicate anomaly/priority, not confirmation."
+}

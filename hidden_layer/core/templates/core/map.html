@@ -1,0 +1,252 @@
+{% extends 'core/layout.html' %}
+{% load static %}
+
+{% block title %}Select Amazon Region{% endblock %}
+
+{% block content %}
+<div class="map-page">
+
+  <div class="map-sidebar">
+
+    <a href="{% url 'index' %}" class="sidebar-logo">
+      <img src="{% static 'core/revoltech_logo.png' %}" alt="Revoltech Logo">
+    </a>
+
+    <div class="sidebar-content">
+      <h2>Select Amazon region</h2>
+      <p class="sidebar-help">Draw an AOI polygon on the map, then run analysis.</p>
+
+      <form method="POST" action="{% url 'analyze' %}" id="analyzeForm">
+        {% csrf_token %}
+        <input type="hidden" name="aoi_geojson" id="aoi_geojson">
+
+        <label class="sidebar-label">Date window</label>
+        <select name="days" class="sidebar-input">
+          <option value="30">Last 30 days</option>
+          <option value="90" selected>Last 90 days</option>
+          <option value="180">Last 180 days</option>
+        </select>
+
+        <label class="sidebar-label">Max cloud %</label>
+        <input name="max_cloud" class="sidebar-input" type="number" min="0" max="100" value="30">
+
+        <button type="submit" class="btn-analyze" id="analyzeBtn">Analyze Region</button>
+        <div class="small" id="statusText"></div>
+      </form>
+
+      {% if has_result %}
+        <div class="layer-controls">
+          <h3>Layers</h3>
+
+          <div class="control-row">
+            <label><input type="checkbox" id="toggleHeat" checked> Heatmap</label>
+          </div>
+          <div class="control-row">
+            <label>Heat opacity</label>
+            <input type="range" id="heatOpacity" min="0" max="100" value="65">
+          </div>
+
+          <div class="site-state">
+            <h3>Selected site</h3>
+            <div id="siteStateCard" class="state-card">
+              <div class="state-empty">Click a hotspot to view its state.</div>
+            </div>
+          </div>
+
+          <div class="disclaimer">
+            Decision support only — scores indicate anomaly/priority, not confirmation.
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ----------------------------
+  // 1) Map init
+  // ----------------------------
+  const map = L.map('map', { zoomControl: true }).setView([-3.4653, -62.2159], 5);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  // ----------------------------
+  // 2) Sidebar elements
+  // ----------------------------
+  const JOB_ID = "{{ job_id|default:'' }}";
+  const statusTextEl = document.getElementById("statusText");
+  const aoiInput = document.getElementById("aoi_geojson");
+  const analyzeBtn = document.getElementById("analyzeBtn");
+  const form = document.getElementById("analyzeForm");
+
+  function setStatusText(msg) {
+    if (statusTextEl) statusTextEl.textContent = msg || "";
+  }
+
+  // Disable analyze until AOI exists
+  if (analyzeBtn) analyzeBtn.disabled = true;
+
+  function setAOI(geojson) {
+    if (aoiInput) aoiInput.value = JSON.stringify(geojson);
+    if (analyzeBtn) analyzeBtn.disabled = false;
+  }
+
+  // Prevent submit without AOI
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      if (!aoiInput || !aoiInput.value) {
+        e.preventDefault();
+        setStatusText("Please draw an AOI polygon/rectangle first.");
+      } else {
+        setStatusText("Submitted. Running analysis…");
+      }
+    });
+  }
+
+  // ----------------------------
+  // 3) Leaflet.Draw setup (AOI drawing)
+  // ----------------------------
+  // If Leaflet.Draw isn't loaded, show a clear message
+  if (!L.Control || !L.Control.Draw) {
+    console.error("Leaflet.Draw not loaded. Make sure leaflet.draw.js is included.");
+    setStatusText("Error: drawing tools not loaded (leaflet.draw.js missing).");
+  } else {
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+      position: "topleft",
+      draw: {
+        polygon: {
+          allowIntersection: false,
+          showArea: true
+        },
+        rectangle: true,
+        polyline: false,
+        circle: false,
+        circlemarker: false,
+        marker: false
+      },
+      edit: {
+        featureGroup: drawnItems,
+        remove: true
+      }
+    });
+    map.addControl(drawControl);
+
+    map.on(L.Draw.Event.CREATED, function (event) {
+      const layer = event.layer;
+
+      // Keep only one AOI at a time
+      drawnItems.clearLayers();
+      drawnItems.addLayer(layer);
+
+      const geojson = layer.toGeoJSON();
+      setAOI(geojson);
+      setStatusText("AOI set. Ready to analyze.");
+    });
+
+    map.on(L.Draw.Event.EDITED, function () {
+      const layers = drawnItems.getLayers();
+      if (layers.length > 0) {
+        const geojson = layers[0].toGeoJSON();
+        setAOI(geojson);
+        setStatusText("AOI updated. Ready to analyze.");
+      }
+    });
+
+    map.on(L.Draw.Event.DELETED, function () {
+      if (aoiInput) aoiInput.value = "";
+      if (analyzeBtn) analyzeBtn.disabled = true;
+      setStatusText("AOI cleared. Draw a new AOI.");
+    });
+  }
+
+  // ----------------------------
+  // 4) Status polling
+  // ----------------------------
+  async function pollStatus() {
+    if (!JOB_ID) return;
+    try {
+      const res = await fetch(`/status/${JOB_ID}/`, { cache: "no-store" });
+      if (!res.ok) {
+        setStatusText("Status: unavailable");
+        return;
+      }
+
+      const st = await res.json();
+      const state = st.state || "unknown";
+      const msg = st.message || st.error || "";
+      setStatusText(`Status: ${state}${msg ? " — " + msg : ""}`);
+
+      if (state === "done") {
+        const hasResult = {{ has_result|yesno:"true,false" }};
+        if (!hasResult) window.location.reload();
+      }
+    } catch (e) {
+      setStatusText("Status: network issue (retrying)");
+    }
+  }
+
+  if (JOB_ID) {
+    {% if status %}
+      setStatusText("Status: {{ status.state }}{% if status.message %} — {{ status.message }}{% endif %}");
+    {% else %}
+      setStatusText("Status: queued");
+    {% endif %}
+    pollStatus();
+    setInterval(pollStatus, 1500);
+  }
+
+  // ----------------------------
+  // 5) Render results (hotspots + selected site)
+  // ----------------------------
+  {% if has_result %}
+    const meta = {{ meta_json|safe }};
+
+    // Use siteStateBody if present; otherwise fallback to siteStateCard
+    const siteEl = document.getElementById("siteStateBody") || document.getElementById("siteStateCard");
+
+    function renderSelectedSite(h) {
+      if (!siteEl) return;
+
+      const reasons = (h.reasons || []).map(r => `<li>${r}</li>`).join("");
+      siteEl.innerHTML = `
+        <div><strong>${h.priority} priority</strong></div>
+        <div class="small">Score: ${Number(h.score).toFixed(3)}</div>
+        <div class="small">Reasons:</div>
+        <ul class="small" style="margin:6px 0 0 18px;">${reasons || "<li>n/a</li>"}</ul>
+        <div class="small" style="margin-top:6px; opacity:0.85;">
+          Decision support only — validate before action.
+        </div>
+      `;
+    }
+
+    // Add hotspot markers
+    const hotspotLayer = L.layerGroup().addTo(map);
+    (meta.hotspots || []).forEach((h, idx) => {
+      const marker = L.circleMarker([h.lat, h.lon], { radius: 8 });
+      marker.bindTooltip(`Hotspot #${idx + 1} — ${h.priority}`);
+      marker.on("click", () => {
+        map.flyTo([h.lat, h.lon], 12, { duration: 0.6 });
+        renderSelectedSite(h);
+      });
+      marker.addTo(hotspotLayer);
+    });
+
+    // Zoom to bbox
+    if (meta.bbox && meta.bbox.length === 4) {
+      const bounds = [[meta.bbox[1], meta.bbox[0]], [meta.bbox[3], meta.bbox[2]]];
+      map.fitBounds(bounds, { padding: [20, 20] });
+    }
+  {% endif %}
+</script>
+{% endblock %}

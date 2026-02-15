@@ -1,0 +1,4 @@
+{
+  "state": "error",
+  "error": "Too much NoData returned (likely edge/tile mismatch). Try a slightly larger AOI."
+}
