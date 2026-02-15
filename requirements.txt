@@ -1,0 +1,9 @@
+pip install numpy
+pip install rasterio
+pip install shapely pyproj fiona
+pip install geopandas
+pip install pystac-client planetary-computer stackstac xarray "dask[array]" requests
+pip install torch torchvision timm
+pip install pillow opencv-python
+pip install streamlit streamlit-folium folium
+pip install django python-dotenv
