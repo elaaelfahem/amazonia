@@ -7,6 +7,18 @@ The project combines remote sensing, self-supervised computer vision, and intera
 
 ---
 
+# 🔀 Repository Structure (Important)
+
+This repository contains two parallel implementations:
+
+- **`main` branch** → Fully functional AI pipeline + Streamlit interactive prototype  
+- **`master` branch** → Django web application (production-oriented architecture, partially integrated AI)
+
+The `main` branch demonstrates the complete AI capabilities (NDVI + DINOv2 + Fusion + Ranking).  
+The `master` branch demonstrates the scalable web deployment architecture with asynchronous job handling and AOI-based analysis.
+
+---
+
 # 🚀 What This Project Demonstrates
 
 Ghost Canopy includes:
@@ -19,7 +31,7 @@ Ghost Canopy includes:
 
 ---
 
-# 🧠 AI Pipeline (Fully Implemented Prototype)
+# 🧠 AI Pipeline (Fully Implemented Prototype — `main` branch)
 
 The AI prototype performs:
 
@@ -59,9 +71,12 @@ The Streamlit dashboard visualizes:
 - Interactive blending controls
 
 ---
+
 <img width="1915" height="972" alt="image" src="https://github.com/user-attachments/assets/bb618fe8-091d-4647-8811-7cf88e4a0b32" />
 
-# 🌐 Django Web Application (Production-Oriented Architecture)
+---
+
+# 🌐 Django Web Application (Production-Oriented Architecture — `master` branch)
 
 In parallel to the AI prototype, a Django-based web application was built to represent the scalable deployment architecture.
 
@@ -108,6 +123,11 @@ After job completion:
 A disclaimer is included to ensure responsible interpretation (“Decision support only”).
 
 ---
+<img width="1876" height="863" alt="image" src="https://github.com/user-attachments/assets/9a603390-3dea-496c-9abb-c213e66f2c04" />
+<img width="1914" height="871" alt="image" src="https://github.com/user-attachments/assets/a469989c-d038-42fd-94d6-cd16afbeac83" />
+<img width="1909" height="874" alt="image" src="https://github.com/user-attachments/assets/be83f9fc-1479-457c-a3f4-cc16a6e9ffc6" />
+<img width="1881" height="869" alt="image" src="https://github.com/user-attachments/assets/855338fb-ecfb-4666-b03c-7dc1c02abd32" />
+
 
 # 📌 Current Integration Status
 
@@ -116,10 +136,8 @@ A disclaimer is included to ensure responsible interpretation (“Decision suppo
 - 🚧 Fusion layer implemented in prototype  
 - 🔄 Full DINO + fusion integration into Django backend planned but not completed within hackathon timeframe  
 
-The Streamlit interface demonstrates the full AI capability, while the Django project represents the intended scalable production architecture.
-
----
-
+The `main` branch demonstrates the full AI capability.  
+The `master` branch demonstrates the scalable web architecture and interactive AOI-based workflow.
 
 ---
 
