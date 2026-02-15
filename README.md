@@ -59,6 +59,7 @@ The Streamlit dashboard visualizes:
 - Interactive blending controls
 
 ---
+<img width="1915" height="972" alt="image" src="https://github.com/user-attachments/assets/bb618fe8-091d-4647-8811-7cf88e4a0b32" />
 
 # 🌐 Django Web Application (Production-Oriented Architecture)
 
