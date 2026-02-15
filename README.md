@@ -1,7 +1,7 @@
 # 🌿 Amazonia
 ## AI-Powered Digital Excavation for the Amazon
 
-Ghost Canopy is a geospatial AI platform designed to surface hidden anthropogenic patterns beneath dense Amazon rainforest canopy using satellite imagery and multimodal anomaly detection.
+Amazonia is a geospatial AI platform designed to surface hidden anthropogenic patterns beneath dense Amazon rainforest canopy using satellite imagery and multimodal anomaly detection.
 
 The project combines remote sensing, self-supervised computer vision, and interactive web mapping into a full-stack prototype.
 
@@ -21,7 +21,7 @@ The `master` branch demonstrates the scalable web deployment architecture with a
 
 # 🚀 What This Project Demonstrates
 
-Ghost Canopy includes:
+Amazonia includes:
 
 - A complete AI anomaly detection pipeline
 - A working Streamlit prototype (full AI capability)
