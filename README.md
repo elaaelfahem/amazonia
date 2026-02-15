@@ -166,3 +166,5 @@ Ghost Canopy aims to reduce the archaeological and environmental verification ga
 This repository demonstrates both:
 - A validated AI proof-of-concept
 - A production-oriented web architecture
+
+  team REVOLTECH : Moeatz laifi , amal lahmadi , elaa elfahem 
